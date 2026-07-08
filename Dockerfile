@@ -25,14 +25,6 @@ ENV DOCKER_BUILD=true
 # ---- 第 3 阶段：生成运行时镜像 ----
 FROM node:22-alpine AS runner
 
-# 安装 CA 证书以支持 HTTPS 请求
-RUN apk add --no-cache ca-certificates \
-    && rm -rf /var/cache/apk/* \
-    && rm -rf /tmp/*
-
-# 创建非 root 用户
-RUN addgroup -g 1001 -S nodejs && adduser -u 1001 -S nextjs -G nodejs
-
 WORKDIR /app
 
 # 创建视频缓存目录和数据目录并设置权限
@@ -54,9 +46,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/start.js ./start.js
 # 从构建器中复制 public 和 .next/static 目录
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# 切换到非特权用户
-USER nextjs
 
 EXPOSE 3000
 
